@@ -23,24 +23,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS tasks (" + COLUMN_NUMBER + " INTEGER PRIMARY KEY, " +
+        String query = "CREATE TABLE IF NOT EXISTS " + TABLE + " (" +
+                COLUMN_NUMBER + " INTEGER PRIMARY KEY, " +
                 COLUMN_NAME + " TEXT, " +
                 COLUMN_DESCRIPTION + " TEXT, " +
                 COLUMN_DATETIME + " TEXT, "+
                 COLUMN_HASTIME+ " INTEGER, " +
-                COLUMN_PRIORITY + " INTEGER);"); // выполняем запрос создания в БД таблицы
-
+                COLUMN_PRIORITY + " INTEGER)"; // TODO: точка с запятой
+        db.execSQL(query); // выполняем запрос создания в БД таблицы
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion,  int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS "+TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE);
         onCreate(db);
     }
 
-    public void deleteDataBase(SQLiteDatabase db){
-        db.execSQL("DROP TABLE IF EXISTS "+TABLE);
-
+    public void deleteDataBase(SQLiteDatabase db) {
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE);
     }
-
 }

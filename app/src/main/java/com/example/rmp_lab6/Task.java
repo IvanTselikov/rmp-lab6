@@ -3,17 +3,16 @@ package com.example.rmp_lab6;
 import java.util.Calendar;
 
 public class Task {
-    static Integer count = 0;
-    private Integer number;
-    private String name;
-    private String description;
-    private Calendar dateTime;
-    private boolean hasTime;
-    private boolean highlighted;
-    private Priority priority;
+    static Integer count = 0; // общее количество созданных задач
+    private Integer number; // номер задачи
+    private String name; // название задачи
+    private String description; // описание
+    private Calendar dateTime; // срок выполнения задачи
+    private boolean hasTime; // false - установлена только дата выполнения задачи, без точного времени
+    private Priority priority; // приоритет задачи
 
-    public Task(Integer number, String name, String description, Calendar dateTime, boolean hasTime, boolean highlighted, Priority priority) throws Exception {
-        if (number==0) { // задача только создана. Номер не установлен
+    public Task(Integer number, String name, String description, Calendar dateTime, boolean hasTime, Priority priority) throws Exception {
+        if (number == 0) { // задача только создана. Номер не установлен
             count++;
             setNumber(count);
         }
@@ -24,7 +23,6 @@ public class Task {
         setDescription(description);
         setDateTime(dateTime);
         setHasTime(hasTime);
-        setHighlighted(highlighted);
         setPriority(priority);
     }
 
@@ -32,7 +30,7 @@ public class Task {
         this.number = number;
     }
 
-    public int getNumber(){return this.number;}
+    public int getNumber() { return this.number; }
 
     public void setName(String name) throws Exception {
         if (name == null || name.trim().length() == 0)
@@ -71,10 +69,6 @@ public class Task {
 
     public boolean getHasTime() { return this.hasTime; }
 
-    public void setHighlighted(boolean highlighted) { this.highlighted = highlighted; }
-
-    public boolean getHightlighted() { return this.highlighted; }
-
     public void setPriority(Priority priority) throws Exception {
         if (priority == null)
             throw new Exception("Приоритет не указан.");
@@ -82,5 +76,6 @@ public class Task {
     }
 
     public Priority getPriority() { return this.priority; }
-    public static void setCount(int c){count = c; }
+
+    public static void setCount(int c) { count = c; }
 }

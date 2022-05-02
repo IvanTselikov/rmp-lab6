@@ -11,7 +11,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -64,10 +63,11 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
             @Override
             public void onClick(View v) {
                 // вызываем метод слушателя, передавая ему данные
-                onClickListener.onTaskClick(task, holder.getAdapterPosition());
+                onClickListener.onTaskClick(task, holder.getAdapterPosition()); // TODO: проверить getAdapterPosition
             }
         });
 
+        // обработка нажатия на кнопку "Удалить"
         holder.removeImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -78,12 +78,21 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
             }
         });
 
-        if (task.getHightlighted()) {
+        if (highlighted) {
             switch (task.getPriority()) {
                 case NORMAL: holder.nameTextView.setBackgroundColor(Color.rgb(255, 255, 128)); break;
                 case HIGH: holder.nameTextView.setBackgroundColor(Color.rgb(255, 128, 128)); break;
                 case LOW: holder.nameTextView.setBackgroundColor(Color.rgb(128, 128, 255)); break;
             }
+        }
+    }
+
+    boolean highlighted = false; // флаг: включена ли подсветка задач
+    public void highlightTasks() {
+        highlighted = !highlighted;
+        for (int i = 0; i < tasks.size(); i++) {
+//            notifyItemRemoved(i);
+            notifyItemRangeChanged(i, tasks.size());
         }
     }
 
@@ -108,16 +117,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
             }
         });
         for (int i = 0; i < tasks.size(); i++) {
-            notifyItemRemoved(i);
-            notifyItemRangeChanged(i, tasks.size());
-        }
-    }
-
-    boolean highlighted = false;
-    public void highlightTasks() {
-        highlighted = !highlighted;
-        for (int i = 0; i < tasks.size(); i++) {
-            tasks.get(i).setHighlighted(highlighted);
             notifyItemRemoved(i);
             notifyItemRangeChanged(i, tasks.size());
         }

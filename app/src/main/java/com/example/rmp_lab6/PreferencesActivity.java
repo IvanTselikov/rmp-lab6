@@ -5,8 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -21,14 +19,16 @@ import java.util.Locale;
 
 public class PreferencesActivity extends AppCompatActivity {
 
-    Calendar dateTime = null;
+    int number = 0; // номер редактируемой задачи
+    Calendar dateTime = Calendar.getInstance();
+    boolean isDateSet = false;
     EditText taskNameEditText, descriptionEditText;
     Button setDateButton, setTimeButton;
     Spinner prioritySpinner;
 
-    DatabaseHelper sqlHelper;
-    SQLiteDatabase db;
-    Cursor userCursor;
+//    DatabaseHelper sqlHelper;
+//    SQLiteDatabase db;
+//    Cursor userCursor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,45 +41,80 @@ public class PreferencesActivity extends AppCompatActivity {
         setTimeButton = findViewById(R.id.setTimeButton);
         prioritySpinner = findViewById(R.id.prioritySpinner);
 
-        sqlHelper = new DatabaseHelper(this);
-        db = sqlHelper.getWritableDatabase();
-
-        // пытаемся получить данные с MainActivity
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            int number = extras.getInt("number");
-            if (number>0) {
-                userCursor = db.rawQuery("select * from " + DatabaseHelper.TABLE + " where " +
-                        DatabaseHelper.COLUMN_NUMBER + "=?", new String[]{String.valueOf(number)});
-                userCursor.moveToFirst();
+            number = extras.getInt("number");
+            String name = extras.getString("name");
+            String description = extras.getString("description");
+            Calendar dateTime = (Calendar) extras.getSerializable("dateTime");
+            boolean hasTime = extras.getBoolean("hasTime");
+            Priority priority = (Priority) extras.getSerializable("priority");
 
-                taskNameEditText.setText(userCursor.getString(1));
-                descriptionEditText.setText(userCursor.getString(2));
-                boolean hasTime = extras.getBoolean("hasTime");
-                long millis = Long.parseLong(userCursor.getString(3));
-                dateTime = Calendar.getInstance();
-                dateTime.setTimeInMillis(millis);
-                Priority priority = (Priority) extras.getSerializable("priority");
-                String timeLabel = String.format(Locale.getDefault(),
-                        "%02d:%02d:%4d",
-                        dateTime.get(Calendar.DAY_OF_MONTH),
-                        dateTime.get(Calendar.MONTH),
-                        dateTime.get(Calendar.YEAR));
-                setDateButton.setText(timeLabel);
-                if (hasTime) {
-                    timeLabel = String.format(Locale.getDefault(),
-                            "%02d:%02d",
-                            dateTime.get(Calendar.HOUR_OF_DAY),
-                            dateTime.get(Calendar.MINUTE));
-                    setTimeButton.setText(timeLabel);
-                }
-                switch (priority) {
-                    case NORMAL: prioritySpinner.setSelection(0); break;
-                    case HIGH: prioritySpinner.setSelection(1); break;
-                    case LOW: prioritySpinner.setSelection(2); break;
-                }
+            isDateSet = true;
+
+            taskNameEditText.setText(name);
+            descriptionEditText.setText(description);
+
+            String timeLabel = String.format(Locale.getDefault(),
+                    "%02d.%02d.%4d",
+                    dateTime.get(Calendar.DAY_OF_MONTH),
+                    dateTime.get(Calendar.MONTH),
+                    dateTime.get(Calendar.YEAR));
+            setDateButton.setText(timeLabel);
+            if (hasTime) {
+                timeLabel = String.format(Locale.getDefault(),
+                        "%02d:%02d",
+                        dateTime.get(Calendar.HOUR_OF_DAY),
+                        dateTime.get(Calendar.MINUTE));
+                setTimeButton.setText(timeLabel);
             }
-            userCursor.close();
+            switch (priority) {
+                case NORMAL: prioritySpinner.setSelection(0); break;
+                case HIGH: prioritySpinner.setSelection(1); break;
+                case LOW: prioritySpinner.setSelection(2); break;
+            }
+        }
+
+//        sqlHelper = new DatabaseHelper(this);
+//        db = sqlHelper.getWritableDatabase();
+
+        // пытаемся получить данные с MainActivity
+//        Bundle extras = getIntent().getExtras();
+//        if (extras != null) {
+//            int number = extras.getInt("number");
+//            if (number > 0) {
+//                userCursor = db.rawQuery("select * from " + DatabaseHelper.TABLE + " where " +
+//                        DatabaseHelper.COLUMN_NUMBER + "=?", new String[]{String.valueOf(number)});
+//                userCursor.moveToFirst();
+//
+//                taskNameEditText.setText(userCursor.getString(1));
+//                descriptionEditText.setText(userCursor.getString(2));
+//                boolean hasTime = extras.getBoolean("hasTime");
+//                long millis = Long.parseLong(userCursor.getString(3));
+//                dateTime = Calendar.getInstance();
+//                dateTime.setTimeInMillis(millis);
+//                Priority priority = (Priority) extras.getSerializable("priority");
+//
+//                String timeLabel = String.format(Locale.getDefault(),
+//                        "%02d:%02d:%4d",
+//                        dateTime.get(Calendar.DAY_OF_MONTH),
+//                        dateTime.get(Calendar.MONTH),
+//                        dateTime.get(Calendar.YEAR));
+//                setDateButton.setText(timeLabel);
+//                if (hasTime) {
+//                    timeLabel = String.format(Locale.getDefault(),
+//                            "%02d:%02d",
+//                            dateTime.get(Calendar.HOUR_OF_DAY),
+//                            dateTime.get(Calendar.MINUTE));
+//                    setTimeButton.setText(timeLabel);
+//                }
+//                switch (priority) {
+//                    case NORMAL: prioritySpinner.setSelection(0); break;
+//                    case HIGH: prioritySpinner.setSelection(1); break;
+//                    case LOW: prioritySpinner.setSelection(2); break;
+//                }
+//            }
+//            userCursor.close();
             /*String name = extras.getString("name");
             String description = extras.getString("description");
             Calendar d = (Calendar) extras.getSerializable("dateTime");
@@ -92,7 +127,7 @@ public class PreferencesActivity extends AppCompatActivity {
             setDateButton.setText(dateLabel);
 
             */
-        }
+//        }
     }
 
     // отображаем диалоговое окно для выбора даты
@@ -136,10 +171,7 @@ public class PreferencesActivity extends AppCompatActivity {
     // установка обработчика выбора даты
     DatePickerDialog.OnDateSetListener d = new DatePickerDialog.OnDateSetListener() {
         public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-            dateTime = Calendar.getInstance();
-            dateTime.set(Calendar.HOUR_OF_DAY, 0);
-            dateTime.set(Calendar.MINUTE, 0);
-            dateTime.set(Calendar.SECOND, 0);
+            isDateSet = true;
             dateTime.set(Calendar.YEAR, year);
             dateTime.set(Calendar.MONTH, monthOfYear);
             dateTime.set(Calendar.DAY_OF_MONTH, dayOfMonth);
@@ -162,7 +194,10 @@ public class PreferencesActivity extends AppCompatActivity {
         };
         Task task;
         try {
-            task = new Task(0, name, description, dateTime, hasTime, false, priority);
+            if (!isDateSet)
+                throw new Exception("Не установлен срок выполнения задачи.");
+
+            task = new Task(number, name, description, dateTime, hasTime, priority);
 
             Intent intent = new Intent();
             intent.putExtra("number", task.getNumber());
@@ -173,6 +208,7 @@ public class PreferencesActivity extends AppCompatActivity {
             intent.putExtra("priority", task.getPriority());
             intent.setClass(this, MainActivity.class);
             startActivity(intent);
+            finish();
         } catch (Exception e) {
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }

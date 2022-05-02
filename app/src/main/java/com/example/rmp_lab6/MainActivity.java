@@ -34,8 +34,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+//        getApplicationContext().deleteDatabase("app.db");
+
         databaseHelper = new DatabaseHelper(getApplicationContext());
+//        databaseHelper = new DatabaseHelper(this);
         db = databaseHelper.getReadableDatabase();
+//        databaseHelper.deleteDataBase(db);
+//        db = databaseHelper.getReadableDatabase();
 
         // пытаемся получить данные с PreferencesActivity
         Bundle extras = getIntent().getExtras();
@@ -47,12 +52,13 @@ public class MainActivity extends AppCompatActivity {
             boolean hasTime = extras.getBoolean("hasTime");
             Priority priority = (Priority) extras.getSerializable("priority");
             try {
-                writeToDB(new Task(number, name, description, d, hasTime, false, priority));
+                writeToDB(new Task(number, name, description, d, hasTime, priority));
             }
             catch (Exception e) { }
         }
 
         query = db.rawQuery("SELECT * FROM " + DatabaseHelper.TABLE, null);
+
         moveToAnswerToRequest(query);
 //         query.close();
 //         db.close();
@@ -61,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
 
         TaskAdapter.OnTaskClickListener taskClickListener = onTaskClickListener(this);
 
-        db.close();
         // создаем адаптер
         adapter = new TaskAdapter(this, tasks, taskClickListener);
         // устанавливаем для списка адаптер
@@ -69,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // определяем слушателя нажатия на кнопку "Редактировать" для конкретной задачи
-    private TaskAdapter.OnTaskClickListener onTaskClickListener(Context currentActivity){
+    private TaskAdapter.OnTaskClickListener onTaskClickListener(Context currentActivity) {
         TaskAdapter.OnTaskClickListener taskClickListener = new TaskAdapter.OnTaskClickListener() {
             @Override
             public void onTaskClick(Task task, int position) {
@@ -82,12 +87,13 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra("priority", task.getPriority());
                 intent.setClass(currentActivity, PreferencesActivity.class);
                 startActivity(intent);
+                finish();
             }
         };
         return taskClickListener;
     }
 
-    //прочитываем ответ на запрос из БД и заполняем список задач
+    // прочитываем ответ на запрос из БД и заполняем список задач
     private void moveToAnswerToRequest(Cursor query){
         while (query.moveToNext()) {
             int number = query.getInt(0);
@@ -99,34 +105,53 @@ public class MainActivity extends AppCompatActivity {
             boolean hasTime = query.getInt(4) == 1;
             Priority priority = Priority.values()[query.getInt(5)];
             try {
-                tasks.add(new Task(number, name, description, dateTime, hasTime, false, priority));
-            }
-            catch (Exception e) { }
-            if(query.isAfterLast()) Task.setCount(number);
+                tasks.add(new Task(number, name, description, dateTime, hasTime, priority));
+            } catch (Exception e) { }
+            if (query.isAfterLast())
+                Task.setCount(number);
         }
         query.close();
     }
 
-    //запись в базу данных
+    // запись в базу данных
     public void writeToDB(Task task) {
         String name = task.getName();
         String description = task.getDescription();
-        String data = String.valueOf(task.getDateTime().getTimeInMillis());
-        Integer hasTime = 1;
-        if (!task.getHasTime()) hasTime = 0;
-        Integer priority = task.getPriority().ordinal();
+        String dateTime = String.valueOf(task.getDateTime().getTimeInMillis());
+        int hasTime = task.getHasTime() ? 1 : 0;
+        int priority = task.getPriority().ordinal();
         int number = task.getNumber();
 
         ContentValues cv = new ContentValues();
         cv.put("number", number);
         cv.put("name", name);
         cv.put("description", description);
-        cv.put("data", data);
+        cv.put("dateTime", dateTime);
         cv.put("hasTime", hasTime);
         cv.put("priority", priority);
 
+        // проверяем, нет ли уже этой записи в таблице
+        Cursor cursor = db.rawQuery("SELECT * FROM " + databaseHelper.TABLE +
+                                        " WHERE " + databaseHelper.COLUMN_NUMBER + " = ?",
+                                        new String[] { Integer.toString(number) });
+        if (cursor.getCount() < 1) {
+            // добавление новой записи
+            db.execSQL("INSERT OR IGNORE INTO " + databaseHelper.TABLE +
+                    " VALUES ('" + number + "','" + name + "', " +
+                    "'" + description + "', '" + dateTime + "', '" + hasTime + "', '" + priority + "')");
+        }
+        else {
+            // изменение старой записи
+            db.execSQL("UPDATE " + databaseHelper.TABLE + " SET " +
+                       databaseHelper.COLUMN_NAME + " = '" + name + "' " +
+                       databaseHelper.COLUMN_DESCRIPTION + " = '" + description + "' " +
+                       databaseHelper.COLUMN_DATETIME + " = '" + dateTime + "' " +
+                       databaseHelper.COLUMN_HASTIME + " = " + hasTime + " " +
+                       databaseHelper.COLUMN_PRIORITY + " = " + priority + " " +
+                       "WHERE " + databaseHelper.COLUMN_NUMBER + " = " + number
+                    );
+        }
         //db.replaceOrThrow("app.db", null, cv);
-        db.execSQL("INSERT OR REPLACE INTO " + databaseHelper.TABLE + " VALUES ('" + number + "','" + name + "', '" + description + "', '" + data + "', '" + hasTime + "', '" + priority + "')");
     }
 
     //нажата кнопка добавления задачи
@@ -134,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setClass(this, PreferencesActivity.class);
         startActivity(intent);
+        finish();
     }
 
     //развернуть меню
@@ -149,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.clear_all:
                 adapter.clearTasks();
-                getBaseContext().deleteDatabase("app.db");
+                databaseHelper.deleteDataBase(db);
                 return true;
             case R.id.sort:
                 adapter.sortTasks();
@@ -164,8 +190,9 @@ public class MainActivity extends AppCompatActivity {
                 for (Task task : tasks) {
                     writeToDB(task);
                 }
+                databaseHelper.close();
                 db.close();
-                System.exit(0);
+                finish();
                 return true;
             default:
                 return true;
