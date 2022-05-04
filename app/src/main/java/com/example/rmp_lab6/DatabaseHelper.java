@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    private static final String DATABASE_NAME = "app.db"; // название бд
+    public static final String DATABASE_NAME = "app.db"; // название бд
     private static final int SCHEMA = 1; // версия базы данных
     static final String TABLE = "tasks"; // название таблицы в бд
     // названия столбцов

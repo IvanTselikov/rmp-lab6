@@ -3,7 +3,7 @@
     <string name="clear_all">Очистить все</string>
     <string name="sort">Сортировать по дате</string>
     <string name="highlight">Выделить цветом по приоритету</string>
-    <string name="exit">Сохранить и выйти</string>
+    <string name="exit">Выйти</string>
     <string name="task_name">Название задачи</string>
     <string name="description">Описание</string>
     <string name="date">Дата</string>

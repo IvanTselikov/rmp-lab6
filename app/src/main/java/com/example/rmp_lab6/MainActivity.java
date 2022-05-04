@@ -37,10 +37,7 @@ public class MainActivity extends AppCompatActivity {
 //        getApplicationContext().deleteDatabase("app.db");
 
         databaseHelper = new DatabaseHelper(getApplicationContext());
-//        databaseHelper = new DatabaseHelper(this);
         db = databaseHelper.getReadableDatabase();
-//        databaseHelper.deleteDataBase(db);
-//        db = databaseHelper.getReadableDatabase();
 
         // пытаемся получить данные с PreferencesActivity
         Bundle extras = getIntent().getExtras();
@@ -53,15 +50,12 @@ public class MainActivity extends AppCompatActivity {
             Priority priority = (Priority) extras.getSerializable("priority");
             try {
                 writeToDB(new Task(number, name, description, d, hasTime, priority));
-            }
-            catch (Exception e) { }
+            } catch (Exception e) { }
         }
 
         query = db.rawQuery("SELECT * FROM " + DatabaseHelper.TABLE, null);
 
         moveToAnswerToRequest(query);
-//         query.close();
-//         db.close();
 
         recyclerView = findViewById(R.id.list);
 
@@ -94,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // прочитываем ответ на запрос из БД и заполняем список задач
-    private void moveToAnswerToRequest(Cursor query){
+    private void moveToAnswerToRequest(Cursor query) {
         while (query.moveToNext()) {
             int number = query.getInt(0);
             String name = query.getString(1);
@@ -132,25 +126,24 @@ public class MainActivity extends AppCompatActivity {
 
         // проверяем, нет ли уже этой записи в таблице
         Cursor cursor = db.rawQuery("SELECT * FROM " + databaseHelper.TABLE +
-                                        " WHERE " + databaseHelper.COLUMN_NUMBER + " = ?",
-                                        new String[] { Integer.toString(number) });
+                " WHERE " + databaseHelper.COLUMN_NUMBER + " = " + number, null);
         if (cursor.getCount() < 1) {
             // добавление новой записи
             db.execSQL("INSERT OR IGNORE INTO " + databaseHelper.TABLE +
-                    " VALUES ('" + number + "','" + name + "', " +
-                    "'" + description + "', '" + dateTime + "', '" + hasTime + "', '" + priority + "')");
-        }
-        else {
+                    " VALUES (" + number + ",'" + name + "', " +
+                    "'" + description + "', '" + dateTime + "', " + hasTime + ", " + priority + ")");
+        } else {
             // изменение старой записи
-            db.execSQL("UPDATE " + databaseHelper.TABLE + " SET " +
-                       databaseHelper.COLUMN_NAME + " = '" + name + "' " +
-                       databaseHelper.COLUMN_DESCRIPTION + " = '" + description + "' " +
-                       databaseHelper.COLUMN_DATETIME + " = '" + dateTime + "' " +
-                       databaseHelper.COLUMN_HASTIME + " = " + hasTime + " " +
-                       databaseHelper.COLUMN_PRIORITY + " = " + priority + " " +
-                       "WHERE " + databaseHelper.COLUMN_NUMBER + " = " + number
-                    );
+            String s = "UPDATE " + databaseHelper.TABLE + " SET " +
+                    databaseHelper.COLUMN_NAME + " = '" + name + "', " +
+                    databaseHelper.COLUMN_DESCRIPTION + " = '" + description + "', " +
+                    databaseHelper.COLUMN_DATETIME + " = '" + dateTime + "', " +
+                    databaseHelper.COLUMN_HASTIME + " = " + hasTime + ", " +
+                    databaseHelper.COLUMN_PRIORITY + " = " + priority + " " +
+                    "WHERE " + databaseHelper.COLUMN_NUMBER + " = " + number;
+            db.execSQL(s);
         }
+        cursor.close();
         //db.replaceOrThrow("app.db", null, cv);
     }
 
@@ -176,6 +169,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.clear_all:
                 adapter.clearTasks();
                 databaseHelper.deleteDataBase(db);
+                getApplicationContext().deleteDatabase(DatabaseHelper.DATABASE_NAME);
                 return true;
             case R.id.sort:
                 adapter.sortTasks();
@@ -185,17 +179,22 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.exit:
                 databaseHelper.deleteDataBase(db);
+                getApplicationContext().deleteDatabase(DatabaseHelper.DATABASE_NAME);
                 databaseHelper = new DatabaseHelper(getApplicationContext());
                 db = databaseHelper.getReadableDatabase();
-                for (Task task : tasks) {
+                for (Task task : tasks)
                     writeToDB(task);
-                }
-                databaseHelper.close();
-                db.close();
                 finish();
                 return true;
             default:
                 return true;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        databaseHelper.close();
+        db.close();
     }
 }
