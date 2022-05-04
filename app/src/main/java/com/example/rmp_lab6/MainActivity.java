@@ -168,8 +168,8 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.clear_all:
                 adapter.clearTasks();
-                databaseHelper.deleteDataBase(db);
-                getApplicationContext().deleteDatabase(DatabaseHelper.DATABASE_NAME);
+                databaseHelper.clearDataBase(db);
+//                getApplicationContext().deleteDatabase(DatabaseHelper.DATABASE_NAME);
                 return true;
             case R.id.sort:
                 adapter.sortTasks();
@@ -178,10 +178,10 @@ public class MainActivity extends AppCompatActivity {
                 adapter.highlightTasks();
                 return true;
             case R.id.exit:
-                databaseHelper.deleteDataBase(db);
-                getApplicationContext().deleteDatabase(DatabaseHelper.DATABASE_NAME);
-                databaseHelper = new DatabaseHelper(getApplicationContext());
-                db = databaseHelper.getReadableDatabase();
+                databaseHelper.clearDataBase(db);
+//                getApplicationContext().deleteDatabase(DatabaseHelper.DATABASE_NAME);
+//                databaseHelper = new DatabaseHelper(getApplicationContext());
+//                db = databaseHelper.getReadableDatabase();
                 for (Task task : tasks)
                     writeToDB(task);
                 finish();

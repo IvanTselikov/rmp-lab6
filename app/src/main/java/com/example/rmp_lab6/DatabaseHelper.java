@@ -39,7 +39,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void deleteDataBase(SQLiteDatabase db) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE);
+    public void clearDataBase(SQLiteDatabase db) {
+        onUpgrade(db, SCHEMA, SCHEMA);
     }
+
+//    public void deleteDataBase(SQLiteDatabase db) {
+//        db.execSQL("DROP TABLE IF EXISTS " + TABLE);
+//    }
 }
