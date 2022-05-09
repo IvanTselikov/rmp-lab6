@@ -63,7 +63,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
             @Override
             public void onClick(View v) {
                 // вызываем метод слушателя, передавая ему данные
-                onClickListener.onTaskClick(task, holder.getAdapterPosition()); // TODO: проверить getAdapterPosition
+                onClickListener.onTaskClick(task, holder.getAdapterPosition());
             }
         });
 
@@ -85,13 +85,16 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
                 case LOW: holder.nameTextView.setBackgroundColor(Color.rgb(128, 128, 255)); break;
             }
         }
+        else {
+            holder.nameTextView.setBackgroundColor(Color.TRANSPARENT);
+        }
     }
 
     boolean highlighted = false; // флаг: включена ли подсветка задач
     public void highlightTasks() {
         highlighted = !highlighted;
         for (int i = 0; i < tasks.size(); i++) {
-//            notifyItemRemoved(i);
+            notifyItemRemoved(i);
             notifyItemRangeChanged(i, tasks.size());
         }
     }

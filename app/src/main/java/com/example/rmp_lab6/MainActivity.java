@@ -178,12 +178,6 @@ public class MainActivity extends AppCompatActivity {
                 adapter.highlightTasks();
                 return true;
             case R.id.exit:
-                databaseHelper.clearDataBase(db);
-//                getApplicationContext().deleteDatabase(DatabaseHelper.DATABASE_NAME);
-//                databaseHelper = new DatabaseHelper(getApplicationContext());
-//                db = databaseHelper.getReadableDatabase();
-                for (Task task : tasks)
-                    writeToDB(task);
                 finish();
                 return true;
             default:
@@ -191,9 +185,28 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+//    @Override
+//    protected void onDestroy() {
+//        super.onDestroy();
+//        databaseHelper.clearDataBase(db);
+////      getApplicationContext().deleteDatabase(DatabaseHelper.DATABASE_NAME);
+////      databaseHelper = new DatabaseHelper(getApplicationContext());
+////      db = databaseHelper.getReadableDatabase();
+//        for (Task task : tasks)
+//            writeToDB(task);
+//        databaseHelper.close();
+//        db.close();
+//    }
+
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStop() {
+        super.onStop();
+        databaseHelper.clearDataBase(db);
+//      getApplicationContext().deleteDatabase(DatabaseHelper.DATABASE_NAME);
+//      databaseHelper = new DatabaseHelper(getApplicationContext());
+//      db = databaseHelper.getReadableDatabase();
+        for (Task task : tasks)
+            writeToDB(task);
         databaseHelper.close();
         db.close();
     }
