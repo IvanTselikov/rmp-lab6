@@ -46,7 +46,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
         String timeLabel = String.format(Locale.getDefault(),
                 "%02d.%02d.%d ",
                 dateTime.get(Calendar.DAY_OF_MONTH),
-                dateTime.get(Calendar.MONTH),
+                dateTime.get(Calendar.MONTH) + 1,
                 dateTime.get(Calendar.YEAR));
 
         if (task.getHasTime())

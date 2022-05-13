@@ -26,10 +26,6 @@ public class PreferencesActivity extends AppCompatActivity {
     Button setDateButton, setTimeButton;
     Spinner prioritySpinner;
 
-//    DatabaseHelper sqlHelper;
-//    SQLiteDatabase db;
-//    Cursor userCursor;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,7 +42,7 @@ public class PreferencesActivity extends AppCompatActivity {
             number = extras.getInt("number");
             String name = extras.getString("name");
             String description = extras.getString("description");
-            Calendar dateTime = (Calendar) extras.getSerializable("dateTime");
+            dateTime = (Calendar) extras.getSerializable("dateTime");
             boolean hasTime = extras.getBoolean("hasTime");
             Priority priority = (Priority) extras.getSerializable("priority");
 
@@ -58,7 +54,7 @@ public class PreferencesActivity extends AppCompatActivity {
             String timeLabel = String.format(Locale.getDefault(),
                     "%02d.%02d.%4d",
                     dateTime.get(Calendar.DAY_OF_MONTH),
-                    dateTime.get(Calendar.MONTH),
+                    dateTime.get(Calendar.MONTH) + 1,
                     dateTime.get(Calendar.YEAR));
             setDateButton.setText(timeLabel);
             if (hasTime) {
@@ -74,60 +70,6 @@ public class PreferencesActivity extends AppCompatActivity {
                 case LOW: prioritySpinner.setSelection(2); break;
             }
         }
-
-//        sqlHelper = new DatabaseHelper(this);
-//        db = sqlHelper.getWritableDatabase();
-
-        // пытаемся получить данные с MainActivity
-//        Bundle extras = getIntent().getExtras();
-//        if (extras != null) {
-//            int number = extras.getInt("number");
-//            if (number > 0) {
-//                userCursor = db.rawQuery("select * from " + DatabaseHelper.TABLE + " where " +
-//                        DatabaseHelper.COLUMN_NUMBER + "=?", new String[]{String.valueOf(number)});
-//                userCursor.moveToFirst();
-//
-//                taskNameEditText.setText(userCursor.getString(1));
-//                descriptionEditText.setText(userCursor.getString(2));
-//                boolean hasTime = extras.getBoolean("hasTime");
-//                long millis = Long.parseLong(userCursor.getString(3));
-//                dateTime = Calendar.getInstance();
-//                dateTime.setTimeInMillis(millis);
-//                Priority priority = (Priority) extras.getSerializable("priority");
-//
-//                String timeLabel = String.format(Locale.getDefault(),
-//                        "%02d:%02d:%4d",
-//                        dateTime.get(Calendar.DAY_OF_MONTH),
-//                        dateTime.get(Calendar.MONTH),
-//                        dateTime.get(Calendar.YEAR));
-//                setDateButton.setText(timeLabel);
-//                if (hasTime) {
-//                    timeLabel = String.format(Locale.getDefault(),
-//                            "%02d:%02d",
-//                            dateTime.get(Calendar.HOUR_OF_DAY),
-//                            dateTime.get(Calendar.MINUTE));
-//                    setTimeButton.setText(timeLabel);
-//                }
-//                switch (priority) {
-//                    case NORMAL: prioritySpinner.setSelection(0); break;
-//                    case HIGH: prioritySpinner.setSelection(1); break;
-//                    case LOW: prioritySpinner.setSelection(2); break;
-//                }
-//            }
-//            userCursor.close();
-            /*String name = extras.getString("name");
-            String description = extras.getString("description");
-            Calendar d = (Calendar) extras.getSerializable("dateTime");
-            // устанавливаем в UI полученные данные, если они были
-            String dateLabel = String.format(Locale.getDefault(),
-                    "%02d.%02d.%d",
-                    dateTime.get(Calendar.DAY_OF_MONTH),
-                    dateTime.get(Calendar.MONTH),
-                    dateTime.get(Calendar.YEAR));
-            setDateButton.setText(dateLabel);
-
-            */
-//        }
     }
 
     // отображаем диалоговое окно для выбора даты
@@ -176,7 +118,7 @@ public class PreferencesActivity extends AppCompatActivity {
             dateTime.set(Calendar.MONTH, monthOfYear);
             dateTime.set(Calendar.DAY_OF_MONTH, dayOfMonth);
             String dateLabel = String.format(Locale.getDefault(),
-                    "%02d.%02d.%d", dayOfMonth, monthOfYear, year);
+                    "%02d.%02d.%d", dayOfMonth, monthOfYear + 1, year);
             setDateButton.setText(dateLabel);
         }
     };

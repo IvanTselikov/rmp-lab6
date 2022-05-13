@@ -101,9 +101,10 @@ public class MainActivity extends AppCompatActivity {
             try {
                 tasks.add(new Task(number, name, description, dateTime, hasTime, priority));
             } catch (Exception e) { }
-            if (query.isAfterLast())
-                Task.setCount(number);
+//            if (query.isAfterLast())
+//                Task.setCount(number);
         }
+        Task.setCount(tasks.size());
         query.close();
     }
 
@@ -169,7 +170,6 @@ public class MainActivity extends AppCompatActivity {
             case R.id.clear_all:
                 adapter.clearTasks();
                 databaseHelper.clearDataBase(db);
-//                getApplicationContext().deleteDatabase(DatabaseHelper.DATABASE_NAME);
                 return true;
             case R.id.sort:
                 adapter.sortTasks();
@@ -185,26 +185,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    @Override
-//    protected void onDestroy() {
-//        super.onDestroy();
-//        databaseHelper.clearDataBase(db);
-////      getApplicationContext().deleteDatabase(DatabaseHelper.DATABASE_NAME);
-////      databaseHelper = new DatabaseHelper(getApplicationContext());
-////      db = databaseHelper.getReadableDatabase();
-//        for (Task task : tasks)
-//            writeToDB(task);
-//        databaseHelper.close();
-//        db.close();
-//    }
 
     @Override
     protected void onStop() {
         super.onStop();
         databaseHelper.clearDataBase(db);
-//      getApplicationContext().deleteDatabase(DatabaseHelper.DATABASE_NAME);
-//      databaseHelper = new DatabaseHelper(getApplicationContext());
-//      db = databaseHelper.getReadableDatabase();
         for (Task task : tasks)
             writeToDB(task);
         databaseHelper.close();
